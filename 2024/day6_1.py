@@ -149,14 +149,6 @@ def find_guard_initial_position(map: list[str]) -> dict[str, list[int, int] | st
                 }
 
 
-def guard_on_map(map: list[str], guard: Guard) -> bool:
-    try:
-        map[guard.location[1]][guard.location[0]]
-        return True
-    except IndexError:
-        return False
-
-
 def walk_guard_on_map(map: list[str], guard: Guard):
     """
     Walks the guard on the map, crossing spots the guard has entered.
@@ -168,13 +160,16 @@ def walk_guard_on_map(map: list[str], guard: Guard):
     map[guard.location[1]] = row[:guard.location[0]] + "X" + row[guard.location[0] + 1:]
 
     location_in_front_of_guard = guard.look_ahead()
-    if map[location_in_front_of_guard[1]][location_in_front_of_guard[0]] in ['.', 'X']:
-        guard.walk()
+    try:
+        if map[location_in_front_of_guard[1]][location_in_front_of_guard[0]] in ['.', 'X']:
+            guard.walk()
 
-    elif map[location_in_front_of_guard[1]][location_in_front_of_guard[0]] == '#':
-        guard.rotate()
+        elif map[location_in_front_of_guard[1]][location_in_front_of_guard[0]] == '#':
+            guard.rotate()
 
-    return map
+        walk_guard_on_map(map, guard)
+    except IndexError:
+        return map
 
 
 def count_positions_on_map(map: list[str]) -> int:
@@ -191,8 +186,7 @@ if __name__ == '__main__':
         print(r)
     guard_info = find_guard_initial_position(map)
     guard = Guard(**guard_info)
-    while guard_on_map(map, guard):
-        map = walk_guard_on_map(map, guard)
+    map = walk_guard_on_map(map, guard)
 
     for r in map:
         print(r)
